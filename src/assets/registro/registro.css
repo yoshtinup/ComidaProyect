@@ -111,16 +111,16 @@
   }
   
   .login-title {
-    font-size: 1.8rem;
+    font-size: 2.8rem;
     margin-bottom: 0.5rem;
-    color: #000000;
+    color: #212121;
     font-weight: bold;
   }
   
   .signup-text {
-    color: #666666;
+    color: #212121;
     margin-bottom: 2rem;
-    font-size: 0.9rem;
+    font-size: 1.2rem;
   }
   
   .input-group {
@@ -144,8 +144,8 @@
 }
   
 .forgot-password {
-    color: #666666;
-    font-size: 0.8rem;
+    color: #212121;
+    font-size: 1.2rem;
     text-decoration: none;
     display: block;
     text-align: right;
@@ -179,10 +179,10 @@
   
   .divider {
     text-align: center;
-    color: #666666;
+    color: #212121;
     margin: 1.5rem 0;
     position: relative;
-    font-size: 0.9rem;
+    font-size: 1.2rem;
     width: 110%;
   }
   .divider::before,
@@ -221,7 +221,7 @@
   
   .social-links {
     display: flex;
-    justify-content: center;
+    justify-content: flex-end;
     gap: 1rem;
     margin-top: 1.5rem;
     font-size: 0.8rem;

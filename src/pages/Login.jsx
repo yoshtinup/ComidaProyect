@@ -98,6 +98,7 @@ const Login = () => {
           <div className="social-links">
             <a href="#"><FaInstagram className="social-icon" /></a>
             <a href="#"><FaFacebook className="social-icon" /></a>
+            <a href="#"><FaGoogle className="social-icon" /></a>
           </div>
         </form>
       </div>
