@@ -1,0 +1,5 @@
+@import "tailwindcss";
+
+.image-circle {
+    @apply absolute w-[60%] h-[95%] rounded-[100%] border-2 border-solid border-[#767676]  top-[15%];
+  }
