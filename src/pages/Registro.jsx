@@ -1,8 +1,8 @@
 
 import Formulario from '../organismo/Formulario';
 import { FaGoogle } from "react-icons/fa";
-import Buttom from '../componets/Buttom';
-import Input from '../componets/Input';
+import Buttom from '../componets/bottom/Buttom';
+import Input from '../componets/inputForm/Input';
 const Registro = () => {
 
   return (

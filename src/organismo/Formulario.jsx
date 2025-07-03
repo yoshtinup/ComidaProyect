@@ -1,72 +1,87 @@
-import { FaChartLine, FaDollarSign, FaDrupal, 
-    FaFacebook, FaInstagram} from 'react-icons/fa';
-import { useState } from 'react';
+import { FaFacebook, FaInstagram } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
-import MangoBlobs from '../assets/img/MangoBlobs.png'; 
-import Icono from "../assets/img/Icono.png";
-const Form1 = () => {
-    return (
-        <div className="flex-1 bg-gray-50 p-4 flex flex-col gap-4">
-        <div className='flex items-center justify-between gap-40 p-4'>
-            <img src={Icono} alt="Icono" className="w-[150px] h-auto object-contain" />
-            <span className="text-2xl font-bold text-black p-[50px]">By Ingehub</span>
-        </div>
+import MangoBlobs from '../assets/img/MangoBlobs.png';
+import Icono from '../assets/img/Icono.png';
 
-        <h1 className="text-[#141517] text-4xl mb-2 ml-8 font-['Palatino_Linotype']">Ordena, recoge y sigue tu camino</h1>
-        <h2 className="text-black text-5xl ml-8">AutoServe</h2>
-        <h3 className='text-red-500 text-3xl ml-8'>fast food</h3>
-        
-        <div className="flex flex-col gap-6 my-8 ml-8">
-            <div className='w-full flex flex-row items-center gap-12'>
-                <div className="flex items-center text-xl text-black pr-4 gap-2.5">
-                    <span>Pureza</span>
-                    <FaDrupal className="text-2xl" />
-                </div>
-                <div className="flex items-center text-xl text-black pr-4 gap-2.5">
-                    <span>Calidad</span>
-                    <FaChartLine className="text-2xl" />
-                </div>
-                <div className="flex items-center text-xl text-black pr-4 gap-2.5">
-                    <span>Mejor precio</span>
-                    <FaDollarSign className="text-2xl" />
-                </div>
-            </div>
-            <div className='relative '>
-                <div className="image-circle"></div>
-                <img className='w-[60%] h-auto object-cover relative' src={MangoBlobs} alt="MangoBlobs" />
-          
-            </div>
-          <button className="absolute bottom-[50px] left-1/2 -translate-x-[350%] bg-[#2c2c2c] text-white py-3 px-6 rounded-xl cursor-pointer font-bold text-sm shadow-md transition-all duration-300 hover:bg-[#3c3c3c]">
+const Form1 = () => {
+  return (
+    <div className="flex-1 flex flex-col items-start justify-center px-6 py-13 bg-white ms-8 md:ms-8">
+      {/* Imagen superior izquierda */}
+      <img src={Icono} alt="icono" className="w-16 h-12 rotate-[-4.47deg]" />
+
+      {/* Subtítulo */}
+      <p className="mt-4 text-zinc-900 text-xl md:text-3xl font-semibold tracking-tight">
+        Ordena, recoge y sigue tu camino
+      </p>
+
+      {/* Título */}
+      <div className="flex items-center mt-4 gap-2">
+        <div className="w-[42px] h-[42px] bg-black rounded-full" />
+        <h1 className="text-yellow-600 text-4xl md:text-6xl font-bold">CineSnacks</h1>
+      </div>
+
+      {/* Texto "snacks" */}
+      <h2 className="mt-4 text-2xl md:text-4xl font-semibold text-black">Snacks</h2>
+
+      {/* Características */}
+      <div className="flex flex-wrap mt-4 gap-4 text-black text-base md:text-lg font-bold">
+        <div className="flex items-center gap-2">
+          <span>📍</span> Pureza
+        </div>
+        <div className="flex items-center gap-2">
+          <span>✅</span> Calidad
+        </div>
+        <div className="flex items-center gap-2">
+          <span>💲</span> Mejor precio
+        </div>
+      </div>
+
+      {/* Imagen circular decorativa */}
+      <div className="relative mt-12 flex justify-center items-center">
+        {/* Imagen circular */}
+        <div className="w-64 h-64 md:w-80 md:h-80 bg-slate-50 rounded-full shadow-[10px_10px_10px_10px_rgba(131,5,5,1.00)] border border-black" />
+
+        {/* Imagen encima del círculo */}
+        <img
+          src={MangoBlobs}
+          alt="Mango"
+          className="absolute w-48 h-48 md:w-72 md:h-72 object-cover"
+        />
+
+        {/* Botón encima */}
+        <div className="absolute bottom-[-2rem] md:bottom-[+3.5rem] sm-bottom-[+2.5rem] sm-2">
+          <button className="bg-zinc-600 text-white font-bold px-6 py-2 rounded-[10px] hover:bg-zinc-700 shadow-md">
             Saber más
           </button>
         </div>
       </div>
-    )
-  }
-const Form2 = ({titulo, subtitulo, children, color}) => {
-    const handleSubmit = (e) => {
-      e.preventDefault();
-      // Lógica de inicio de sesión aquí
-    };
-    return (
-        <div className={`flex-1 flex justify-center p-8 bg-gradient-to-r ${color}`}>
-        <form onSubmit={handleSubmit} className="w-full max-w-[450px] text-center mt-12">
-          <h2 className="text-4xl mb-2 text-[#212121] font-bold">{titulo}</h2>
-          <p className="text-[#212121] mb-8 text-xl">{subtitulo}</p>
-          {children}
-          <div className="flex justify-center gap-4 mt-4">
-            <a href="#" className="text-2xl text-[#212121] hover:text-gray-700"><FaInstagram /></a>
-            <a href="#" className="text-2xl text-[#212121] hover:text-gray-700"><FaFacebook /></a>
-          </div>
-        </form>
-      </div>
-    )
-  }
 
+    </div>
+  );
+};
 
-const Formulario =  {
-    Form1,
-    Form2
-}
+const Form2 = ({ titulo, subtitulo, children, color, onSubmit }) => {
+  return (
+    <div className={`flex-1 flex justify-center items-center px-6 py-10 bg-gradient-to-r ${color}`}>
+      <form
+        onSubmit={onSubmit}
+        className="w-full max-w-[450px] text-center"
+      >
+        <h2 className="text-4xl mb-2 text-[#212121] font-bold">{titulo}</h2>
+        <p className="text-[#212121] mb-8 text-xl">{subtitulo}</p>
+        {children}
+        <div className="flex justify-center gap-4 mt-4">
+          <a href="#" className="text-2xl text-[#212121] hover:text-gray-700"><FaInstagram /></a>
+          <a href="#" className="text-2xl text-[#212121] hover:text-gray-700"><FaFacebook /></a>
+        </div>
+      </form>
+    </div>
+  );
+};
+
+const Formulario = {
+  Form1,
+  Form2,
+};
 
 export default Formulario;
