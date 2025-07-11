@@ -1,6 +1,5 @@
 import { useState } from 'react';
-import { jwtDecode } from 'jwt-decode';// Asegúrate de instalar jwt-decode con npm o yarn
-
+import { jwtDecode } from 'jwt-decode';
 import Formulario from '../organismo/Formulario';
 import { FaGoogle } from "react-icons/fa";
 import Buttom from '../componets/bottom/Buttom';
@@ -12,8 +11,7 @@ const Login = () => {
   const [gmail, setGmail] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
-  const jwt_decode = jwtDecode; // Asegúrate de que jwt_decode esté correctamente importado
-
+  const jwt_decode = jwtDecode; 
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -53,7 +51,7 @@ const Login = () => {
       titulo={"Iniciar sesión"}
       subtitulo={"Ingresa tus datos de acceso"}
       color={"from-[#FD1D1D] to-[#FCB045]"}
-      onSubmit={handleLogin} // ✅ Este es el cambio más importante
+      onSubmit={handleLogin} 
     >
       <Input.Input1
         name={"Correo electrónico"}
@@ -73,14 +71,14 @@ const Login = () => {
         Contraseña debe tener más de 8 caracteres
       </a>
 
-      <Buttom.Buttom1 contexto={"Iniciar sesión"} type={"submit"} />
+      <Buttom.Buttom1 contexto={"Iniciar sesión"} type={"submit"} large="w-full"/>
       <Buttom.Buttom2 contexto={"Registrarse"} type={"button"} ruta={"/registro"} />
 
       <div className="text-center text-[#212121] my-6 relative w-[110%] text-sm">
         O continuar con
       </div>
 
-      <Buttom.Buttom3 contexto={"Iniciar registro con Google"} type={"button"}>
+      <Buttom.Buttom3 contexto={"Iniciar registro con Google"} type={"button"} large="w-full">
         <FaGoogle className="text-xl" />
       </Buttom.Buttom3>
     </Formulario.Form2>

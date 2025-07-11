@@ -1,14 +1,15 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import TitlePanel from "../componets/title/TitlePanel";
 import CarritoItem from "../componets/CarritoItem";
 import ScrollVertical from "../componets/scroll/ScrollVertical";
-
+import Buttom from "../componets/bottom/Buttom";
 function BodyCarrito({ idpruducto, idcarrito }) {
   const [itemsDelCarrito, setItemsDelCarrito] = useState([]);
   const [loading, setLoading] = useState(true);
-
   const ids = idpruducto || [];
   const idc = idcarrito || [];
+  const navigate = useNavigate();
 
   useEffect(() => {
     console.log("ID del producto:", ids);
@@ -51,6 +52,8 @@ function BodyCarrito({ idpruducto, idcarrito }) {
       // Si los ids/idc vienen de props, deberías notificar al padre real aquí
     }
   };
+
+
 
   return (
     <div className="flex justify-center w-full min-h-screen bg-neutral-50 ">
@@ -121,16 +124,12 @@ function BodyCarrito({ idpruducto, idcarrito }) {
             </div>
           </div>
         </div>
-        {/*boton de pago*/}
-        <div className="self-stretch px-4 py-3 inline-flex justify-start items-start cursor-pointer">
-          <div className="flex-1 h-12 max-w-[480px] min-w-20 px-5 bg-black rounded-lg flex justify-center items-center overflow-hidden">
-            <div className="inline-flex flex-col justify-start items-center overflow-hidden">
-              <div className="text-center justify-start text-neutral-50 text-base font-bold font-['Plus_Jakarta_Sans'] leading-normal">
-                Proceder al Pago
-              </div>
-            </div>
-          </div>
-        </div>
+        <Buttom.Buttom1
+        contexto="Proceder al pago"
+        large="w-1/2" 
+        onClick={() => navigate("/pago") }
+        >
+        </Buttom.Buttom1>
       </div>
     </div>
   );

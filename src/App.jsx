@@ -8,6 +8,7 @@ import Inicio from './pages/Inicio';
 import LoginAdmin from './pages/LoginAdmin';
 {/* ruta de carrito */}
 import Carrito from './pages/Carrito';
+import Pago from './pages/Pago';
 function App() {
     return ( 
         <BrowserRouter>
@@ -20,6 +21,7 @@ function App() {
                 <Route path="/panel-admin" element={<PanelAdmin/>}/>
                 <Route path="/inicio" element={<Inicio/>}/>
                 <Route path="/carrito" element={<Carrito/>}/>
+                <Route path="/pago" element={<Pago/>}/>
             </Routes>
         </BrowserRouter>
      );

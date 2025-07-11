@@ -1,26 +1,22 @@
-          <div>
-            <label htmlFor="imagen" className="block text-sm font-medium">Imagen:</label>
-            <div className="relative mt-1">
-              <input
-                type="file"
-                id="imagen"
-                name="imagen"
-                accept="image/*"
-                required
-                onChange={handleImageChange}
-                className="block w-full text-sm text-gray-300 file:mr-4 file:py-2 file:px-4
-                file:rounded file:border-0
-                file:text-sm file:font-semibold
-                file:bg-blue-600 file:text-white
-                hover:file:bg-blue-700"
-              />
-              <p className="mt-1 text-sm">{fileName}</p>
-            </div>
-
-            {previewUrl && (
-              <div className="mt-4">
-                <p className="text-sm mb-1">Vista previa:</p>
-                <img src={previewUrl} alt="Vista previa" className="max-h-48 rounded border" />
-              </div>
-            )}
-          </div>
+[
+  "imagen-1751252456521.jpeg",
+  "imagen-1751252920731.jpg",
+  "imagen-1751264940732.jpg",
+  "imagen-1751265211016.jpg",
+  "imagen-1751265328771.jpg",
+  "imagen-1751265527051.jpg",
+  "imagen-1751270408600.png",
+  "imagen-1751271025522.png",
+  "imagen-1751271433475.png",
+  "imagen-1751271618794.png",
+  "imagen-1751272189572.png",
+  "imagen-1751272260278.png",
+  "imagen-1751272807377.png",
+  "imagen-1751273150012.png",
+  "imagen-1751273579808.png",
+  "imagen-1751273780458.png",
+  "imagen-1751281732812.png",
+  "imagen-1751281906050.png",
+  "imagen-1751283042483.png",
+  "imagen-1751283404314.png"
+]

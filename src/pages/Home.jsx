@@ -22,14 +22,6 @@ function Home() {
     return (
         <>
             <Header />
-            {/* Mostrar datos del usuario si existen */}
-            {userData && (
-                <div style={{ padding: "1rem", background: "#f3f3f3" }}>
-                    <strong>ID:</strong> {userData.id}<br />
-                    <strong>Tipo:</strong> {userData.tipo}<br />
-                    <strong>Nombre:</strong> {userData.nombre}<br />
-                </div>
-            )}
             <Body
               iduser={userData.id}
               nombre={userData.nombre}

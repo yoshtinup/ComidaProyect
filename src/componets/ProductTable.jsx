@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import EditProductModal from './EditProductModal';
 import ScrollVertical from './scroll/ScrollVertical';
+import ModalConfirmacion from './modal/ModalConfirmacion';
 const ProductTable = () => {
   const [products, setProducts] = useState([]);
   const [showDesc, setShowDesc] = useState({ open: false, text: '' });
@@ -77,6 +78,23 @@ const ProductTable = () => {
       alert('Error al guardar los cambios');
     }
   };
+  const [productoSeleccionado, setProductoSeleccionado] = useState(null);
+
+  const confirmarEliminacion = (producto) => {
+    setProductoSeleccionado(producto);
+  };
+
+  const eliminarProducto = async () => {
+    try {
+      const id = productoSeleccionado._id || productoSeleccionado.id;
+      await axios.delete(`http://localhost:3000/eliminar-producto/${id}`);
+      fetchProducts(); // recarga la lista
+      setProductoSeleccionado(null); // cerrar el modal
+    } catch (error) {
+      alert('Error al eliminar el producto');
+    }
+  };
+
 
   return (
     <div className="w-full px-2 py-2 sm:px-4 sm:py-3">
@@ -126,6 +144,7 @@ const ProductTable = () => {
                       <button
                         type="button"
                         className="text-xs sm:text-sm font-bold text-[#727272] hover:underline"
+                         onClick={() => confirmarEliminacion(product)}
                       >
                         Eliminar
                       </button>
@@ -139,6 +158,14 @@ const ProductTable = () => {
           ))}
         </div>
       </div>
+      {/* Modal */}
+      {productoSeleccionado && (
+        <ModalConfirmacion
+          mensaje={`¿Deseas eliminar el producto "${productoSeleccionado.nombre}"?`}
+          onConfirmar={eliminarProducto}
+          onCancelar={() => setProductoSeleccionado(null)}
+        />
+      )}
 
       {/* Modal para mostrar descripción completa */}
       {showDesc.open && (
