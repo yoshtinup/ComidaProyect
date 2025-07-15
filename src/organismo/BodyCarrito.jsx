@@ -22,7 +22,7 @@ function BodyCarrito({ idpruducto, idcarrito }) {
     setLoading(true);
     Promise.all(
       ids.map((id) =>
-        fetch(`http://localhost:3002/api/v1/producto/${id}`).then((res) =>
+        fetch(`http://3.230.107.32:3002/api/v1/producto/${id}`).then((res) =>
           res.json()
         )
       )
@@ -69,7 +69,7 @@ function BodyCarrito({ idpruducto, idcarrito }) {
               itemsDelCarrito.map((item, idx) => (
                 <CarritoItem
                   key={item.id}
-                  imageUrl={`http://localhost:3000/imagenes/${item.imagen}`}
+                  imageUrl={`http://3.235.82.25:3000/imagenes/${item.imagen}`}
                   name={item.nombre}
                   units={item.cantidad}
                   total={item.precio}

@@ -16,7 +16,7 @@ const Login = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('http://localhost:3002/api/v1/loginUser', {
+      const response = await axios.post('http://3.230.107.32:3002/api/v1/loginUser', {
         gmail,
         password
       });

@@ -11,7 +11,7 @@ const Body = ({iduser, nombre}) => {
   useEffect(() => {
     const fetchProductos = async () => {
       try {
-        const response = await axios.get('http://localhost:3002/api/v1/producto'); // Cambia por tu endpoint real
+        const response = await axios.get('http://3.230.107.32:3002/api/v1/producto'); // Cambia por tu endpoint real
         setProductos(response.data); // Asegúrate que el formato coincida (nombre, precio, imagen)
       } catch (error) {
         console.error('Error al cargar los productos:', error);
@@ -35,7 +35,7 @@ const Body = ({iduser, nombre}) => {
     };
 
     try {
-      await axios.post('http://localhost:3002/api/v1/carrito', data);
+      await axios.post('http://3.230.107.32:3002/api/v1/carrito', data);
       setModalOpen(true);
     } catch (error) {
       console.error('Error al agregar al carrito:', error);
@@ -69,7 +69,7 @@ const Body = ({iduser, nombre}) => {
                 id={p.id}
                 nombre={p.nombre}
                 precio={`$${p.precio} MXN - ${p.cantidad}g`}
-                imagen={`http://localhost:3000/imagenes/${p.imagen}`}
+                imagen={`http://3.235.82.25:3000/imagenes/${p.imagen}`}
                 onAddToCart={(id) => handleAddToCart(id)}
               />
               

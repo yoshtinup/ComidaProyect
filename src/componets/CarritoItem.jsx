@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 // Componente para un solo ítem del carrito
 function CarritoItem({ imageUrl, name, units, total, idcarrito, onRemove }) {
     const handleRemove = () => {
-        fetch(`http://localhost:3002/api/v1/carrito/${idcarrito}`, {
+        fetch(`http://3.230.107.32:3002/api/v1/carrito/${idcarrito}`, {
             method: 'DELETE',
         })
         .then(res => {

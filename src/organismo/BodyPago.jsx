@@ -24,7 +24,7 @@ function BodyPago({idpruducto, idcarrito}) {
         setLoading(true);
         Promise.all(
         ids.map((id) =>
-            fetch(`http://localhost:3002/api/v1/producto/${id}`).then((res) =>
+            fetch(`http://3.230.107.32:3002/api/v1/producto/${id}`).then((res) =>
             res.json()
             )
         )
@@ -48,7 +48,7 @@ function BodyPago({idpruducto, idcarrito}) {
             return;
         }
         try {
-            const response = await fetch('http://localhost:3002/api/v1/payment', {
+            const response = await fetch('http://3.230.107.32:3002/api/v1/payment', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

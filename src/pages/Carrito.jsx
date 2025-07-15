@@ -26,7 +26,7 @@ function Carrito() {
 
     useEffect(() => {
         if (userData && userData.id) {
-            fetch("http://localhost:3002/api/v1/carrito")
+            fetch("http://3.230.107.32:3002/api/v1/carrito")
                 .then(res => res.json())
                 .then(data => {
                     const filtrados = data.filter(item => String(item.iduser) === String(userData.id));

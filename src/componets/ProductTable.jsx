@@ -11,7 +11,7 @@ const ProductTable = () => {
 
   const fetchProducts = async () => {
     try {
-      const res = await axios.get('http://localhost:3002/api/v1/producto');
+      const res = await axios.get('http://3.230.107.32:3002/api/v1/producto');
       setProducts(res.data);
     } catch (err) {
       console.error('Error al cargar productos:', err);
@@ -68,7 +68,7 @@ const ProductTable = () => {
         formData.append('imagen', editForm.imagen);
       }
       await axios.put(
-        `http://localhost:3000/actualizar-producto/${id}`,
+        `http://3.235.82.25:3000/actualizar-producto/${id}`,
         formData,
         { headers: { 'Content-Type': 'multipart/form-data' } }
       );
@@ -87,7 +87,7 @@ const ProductTable = () => {
   const eliminarProducto = async () => {
     try {
       const id = productoSeleccionado._id || productoSeleccionado.id;
-      await axios.delete(`http://localhost:3000/eliminar-producto/${id}`);
+      await axios.delete(`http://3.235.82.25:3000/eliminar-producto/${id}`);
       fetchProducts(); // recarga la lista
       setProductoSeleccionado(null); // cerrar el modal
     } catch (error) {
@@ -120,7 +120,7 @@ const ProductTable = () => {
                 >
                   {col.key === 'imagen' ? (
                     <img
-                      src={`http://localhost:3000/imagenes/${product[col.key]}`}
+                      src={`http://3.235.82.25:3000/imagenes/${product[col.key]}`}
                       alt={product.nombre}
                       className="max-h-10 max-w-[60px] object-contain mx-auto"
                     />

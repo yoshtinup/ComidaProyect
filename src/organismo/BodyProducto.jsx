@@ -53,7 +53,7 @@ const FormularioProducto = () => {
     }
 
     try {
-      const response = await fetch('http://localhost:3000/registrar-producto', {
+      const response = await fetch('http://3.235.82.25:3000/registrar-producto', {
         method: 'POST',
         body: formData
       });
