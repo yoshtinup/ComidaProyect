@@ -9,6 +9,13 @@ import LoginAdmin from './pages/LoginAdmin';
 {/* ruta de carrito */}
 import Carrito from './pages/Carrito';
 import Pago from './pages/Pago';
+
+import PaymentSuccess from './pages/PaymentSucess';
+import MyOrders from './pages/MyOrders';
+
+import DispenserSelector from './pages/DispenserSelector';
+{/* rutas de nfc */}
+import NFCReference from './pages/NFCReference';
 function App() {
     return ( 
         <BrowserRouter>
@@ -22,6 +29,15 @@ function App() {
                 <Route path="/inicio" element={<Inicio/>}/>
                 <Route path="/carrito" element={<Carrito/>}/>
                 <Route path="/pago" element={<Pago/>}/>
+
+
+                <Route path="/nfc-reference" element={<NFCReference/>}/>
+                <Route path="/payment-success" element={<PaymentSuccess/>}/>
+                <Route path="/my-orders" element={<MyOrders/>}/>
+                <Route path="/dispenser-selector" element={<DispenserSelector/>}/>
+                
+                
+
             </Routes>
         </BrowserRouter>
      );

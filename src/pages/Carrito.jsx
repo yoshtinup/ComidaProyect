@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import HeaderCarrito from "../componets/HeaderCarrito";
+import Header from "../componets/Header";
 import BodyCarrito from "../organismo/BodyCarrito";
 import { jwtDecode } from "jwt-decode";
 
@@ -38,7 +38,7 @@ function Carrito() {
 
     return (
         <>
-            <HeaderCarrito />
+            <Header/>
             {userData && (
                 <div style={{ padding: "1rem", background: "#f3f3f3" }}>
                     <strong>ID:</strong> {userData.id}<br />
