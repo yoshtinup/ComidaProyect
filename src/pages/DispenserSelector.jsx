@@ -1,12 +1,22 @@
 import React, { useEffect, useState } from "react";
 import Header from "../../src/componets/Header.jsx";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation} from "react-router-dom";
 function DispenserSelector({ onSelect }) {
   const navigate = useNavigate();
   const [dispensers, setDispensers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState(null);
   const [search, setSearch] = useState("");
+  const location = useLocation();
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const token = params.get("token");
+    if (token) {
+      localStorage.setItem("token", token);
+      navigate("/dispenser-selector", { replace: true });
+    }
+  }, [location, navigate]);
+
 
   useEffect(() => {
     setLoading(true);

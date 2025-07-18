@@ -13,6 +13,8 @@ import Pago from './pages/Pago';
 import PaymentSuccess from './pages/PaymentSucess';
 import MyOrders from './pages/MyOrders';
 
+import GoogleCallback from './pages/GoogleCallback';
+
 import DispenserSelector from './pages/DispenserSelector';
 {/* rutas de nfc */}
 import NFCReference from './pages/NFCReference';
@@ -35,6 +37,7 @@ function App() {
                 <Route path="/payment-success" element={<PaymentSuccess/>}/>
                 <Route path="/my-orders" element={<MyOrders/>}/>
                 <Route path="/dispenser-selector" element={<DispenserSelector/>}/>
+                <Route path="/google-callback" element={<GoogleCallback />} />
                 
                 
 

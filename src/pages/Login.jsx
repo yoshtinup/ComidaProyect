@@ -13,10 +13,20 @@ const Login = () => {
   const navigate = useNavigate();
   const jwt_decode = jwtDecode; 
 
+const GOOGLE_AUTH_URL = 'http://localhost:3002/api/v1/auth/google';
+  const handleLoginGoogle = () => {
+    alert("Inicia sesión con Google");
+    window.location.href = GOOGLE_AUTH_URL;
+  };
+
+
+
+
+
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('http://3.230.107.32:3002/api/v1/loginUser', {
+      const response = await axios.post('http://127.0.0.1:3002/api/v1/loginUser', {
         gmail,
         password
       });
@@ -86,10 +96,9 @@ const Login = () => {
         O continuar con
       </div>
 
-      <Buttom.Buttom3 contexto={"Iniciar registro con Google"} type={"button"} large="w-full">
-        <FaGoogle className="text-xl" />
-      </Buttom.Buttom3>
+     <button onClick={handleLoginGoogle}>Google</button>
     </Formulario.Form2>
+
 
     </div>
   );
