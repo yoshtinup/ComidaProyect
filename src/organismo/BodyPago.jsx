@@ -4,10 +4,13 @@ import CheckBox from "../componets/checkbox/CheckBox";
 import ScrollVertical from "../componets/scroll/ScrollVertical";
 import PagoItem from "../componets/PagoItem";
 import TitlePanel from "../componets/title/TitlePanel";
+import { useCallback } from "react";
 
 function BodyPago({idpruducto, idcarrito}) {
     const [itemsDelCarrito, setItemsDelCarrito] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [dispensers, setDispensers] = useState([]);
+    const [loadingDispensers, setLoadingDispensers] = useState(true);
 
     const ids = idpruducto || [];
     const idc = idcarrito || [];
@@ -34,7 +37,26 @@ function BodyPago({idpruducto, idcarrito}) {
             setLoading(false);
         })
         .catch(() => setLoading(false));
-    }, [ids.join(",")]); // Solo se ejecuta cuando cambian los IDs
+    }, [ids.join(",")]);
+
+    useEffect(() => {
+        if (!ids || ids.length === 0) {
+            setDispensers([]);
+            setLoadingDispensers(false);
+            return;
+        }
+        setLoadingDispensers(true);
+        fetch('http://localhost:3002/api/v1/dispenser/')
+            .then(res => res.json())
+            .then(data => {
+                setDispensers(data);
+                setLoadingDispensers(false);
+            })
+            .catch(() => setLoadingDispensers(false));
+    }, [ids.join(",")]);
+    console.log(dispensers);
+    console.log(itemsDelCarrito);
+    
 
   const totalCarrito = itemsDelCarrito.reduce(
     (acum, item) => acum + (parseFloat(item.precio) || 0),
@@ -100,6 +122,44 @@ function BodyPago({idpruducto, idcarrito}) {
                     )}
                 </div>
                 </ScrollVertical>
+                <div className="mt-4">
+                  <h2 className="text-lg font-semibold mb-2">Dispensadores con stock disponible</h2>
+                  {loadingDispensers ? (
+                    <div className="text-gray-500">Buscando dispensadores...</div>
+                  ) : (
+                    <>
+                      {itemsDelCarrito.length === 0 ? (
+                        <div className="text-gray-500">No hay productos para buscar en dispensadores.</div>
+                      ) : (
+                        ids.map((id, idx) => {
+                          const producto = itemsDelCarrito[idx];
+                          const dispensersWithProduct = dispensers.filter(disp =>
+                            disp.products && disp.products.some(p => String(p.id) === String(id) && p.cantidad > 0)
+                          );
+                          return (
+                            <div key={id} className="mb-4 p-2 border rounded bg-gray-50">
+                              <div className="font-medium text-stone-700">{producto?.nombre || 'Producto'}</div>
+                              {dispensersWithProduct.length > 0 ? (
+                                <ul className="list-disc ml-6">
+                                  {dispensersWithProduct.map(disp => {
+                                    const prod = disp.products.find(p => String(p.id) === String(id));
+                                    return (
+                                      <li key={disp.dispenser_id} className="mb-1">
+                                        <span className="font-semibold">{disp.location}</span> - Stock: {prod.cantidad} - Estado: <span className={disp.status === 'online' ? 'text-green-600' : 'text-red-600'}>{disp.status}</span>
+                                      </li>
+                                    );
+                                  })}
+                                </ul>
+                              ) : (
+                                <div className="text-red-500">No disponible en ningún dispensador.</div>
+                              )}
+                            </div>
+                          );
+                        })
+                      )}
+                    </>
+                  )}
+                </div>
                 <div className="self-stretch p-4 inline-flex flex-col justify-start items-start">
                     <div className="self-stretch py-2 inline-flex justify-between items-start">
                         <div className="inline-flex flex-col justify-start items-start">

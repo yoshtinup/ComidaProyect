@@ -22,6 +22,14 @@ const Login = () => {
       });
 
       const { token } = response.data;
+      if (!token) {
+        console.error('Login failed: Token not received');
+        return;
+      }
+      const userId = response.data.userId;
+      // Guardar userId en localStorage
+      localStorage.setItem('userId', userId);
+
 
       // Guardar token en localStorage
       localStorage.setItem('token', token);
@@ -34,9 +42,9 @@ const Login = () => {
       if (tipo === 'admin') {
         navigate('/panel-admin');
       } else if (tipo === 'cliente') {
-        navigate('/home');
+        navigate('/dispenser-selector');
       } else {
-        navigate('/home');
+        navigate('/dispenser-selector');
       }
 
     } catch (error) {

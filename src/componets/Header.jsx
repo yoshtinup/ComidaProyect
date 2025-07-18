@@ -37,8 +37,8 @@ export default function Header() {
         <nav className="hidden lg:flex space-x-6 ">
           <Link to="/inicio" className="hover:text-blue-600 mt-2">Inicio</Link>
           <Link to="/home" className="hover:text-blue-600 mt-2">Menu panel</Link>
-          <Link to="/contacto" className="hover:text-blue-600 mt-2">Conbos</Link>
-          <Link to="/carrito" className="hover:text-blue-600 mt-2">Mi Cuenta</Link>
+          <Link to="/nfc-reference" className="hover:text-blue-600 mt-2">Rerenciar NFC</Link>
+          <Link to="/my-orders" className="hover:text-blue-600 mt-2">Mis pedidos</Link>
           <div className="w-10 h-10 rounded-full bg-[#EDEDED] flex items-center justify-center cursor-pointer hover:animate-bounce"
             onClick={() => navigate("/inicio")}>
             <Iconos.Busqueda />
