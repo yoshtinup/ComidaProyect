@@ -1,6 +1,6 @@
-
+import BodyAdmin from "../organismo/BodyAdminNew";
 import HeaderAdmin from "../componets/HeaderAdmin";
-import BodyAdmin from "../organismo/BodyAdmin";
+
 function PanelAdmin() {
     return (
         <>

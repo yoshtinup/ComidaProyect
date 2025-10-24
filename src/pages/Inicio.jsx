@@ -2,7 +2,7 @@
 import HeaderAdmin from '../componets/HeaderAdmin';
 import Header from '../componets/Header';
 import Footer from '../organismo/Footer';
-import BodyInicio from '../organismo/bodyInicio';
+import BodyInicio from '../organismo/BodyInicio';
 import { jwtDecode } from 'jwt-decode';
 
 
@@ -23,22 +23,8 @@ function Inicio() {
 
     return (
         <>
-        {/* Header */}
-        {userData?.tipo === 'admin' ? <HeaderAdmin /> : <Header />}
-        {userData && (
-            <div style={{ padding: "1rem", background: "#f3f3f3" }}>
-                <strong>ID:</strong> {userData.id}<br />
-                <strong>Tipo:</strong> {userData.tipo}<br />
-                <strong>Nombre:</strong> {userData.nombre}<br />
-            </div>
-        )}
-
-        {/* body */}
-        <BodyInicio></BodyInicio>
-        {/* Footer */}
+        <BodyInicio/>
         <Footer />
-        
-        {/* Fin body */}
         </>
     )
 }

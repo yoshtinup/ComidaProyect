@@ -5,16 +5,36 @@ import ScrollVertical from "../componets/scroll/ScrollVertical";
 import PagoItem from "../componets/PagoItem";
 import TitlePanel from "../componets/title/TitlePanel";
 import { useCallback } from "react";
+import config from "../config/apiConfig";
+import mercadoPagoService from "../services/mercadoPagoService";
 
 function BodyPago({idpruducto, idcarrito}) {
     const [itemsDelCarrito, setItemsDelCarrito] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [dispensers, setDispensers] = useState([]);
-    const [loadingDispensers, setLoadingDispensers] = useState(true);
+    const [paymentLoading, setPaymentLoading] = useState(false);
 
     const ids = idpruducto || [];
     const idc = idcarrito || [];
     const [checked, setChecked] = useState(false);
+    const usuario = localStorage.getItem("name") || "cinesnacksuser";
+    const email = localStorage.getItem("email") || "cliente@cinesnacks.com";
+
+    // Inicializar MercadoPago SDK cuando el componente se monta
+    useEffect(() => {
+        const initMercadoPago = async () => {
+            try {
+                // La clave pública debería venir de las variables de entorno
+                // Por ahora usamos una clave de prueba, pero deberías configurar VITE_MP_PUBLIC_KEY
+                const publicKey = import.meta.env.VITE_MP_PUBLIC_KEY || 'TEST-e8c22925-4747-4c39-9b1e-62d0b5c1c8c8';
+                await mercadoPagoService.initialize(publicKey);
+                console.log('✅ MercadoPago SDK inicializado en componente');
+            } catch (error) {
+                console.error('❌ Error al inicializar MercadoPago:', error);
+            }
+        };
+
+        initMercadoPago();
+    }, []);
 
     useEffect(() => {
         console.log("ID del producto:", ids);
@@ -27,7 +47,7 @@ function BodyPago({idpruducto, idcarrito}) {
         setLoading(true);
         Promise.all(
         ids.map((id) =>
-            fetch(`http://3.230.107.32:3002/api/v1/producto/${id}`).then((res) =>
+            fetch(config.endpoints.producto(id)).then((res) =>
             res.json()
             )
         )
@@ -39,22 +59,6 @@ function BodyPago({idpruducto, idcarrito}) {
         .catch(() => setLoading(false));
     }, [ids.join(",")]);
 
-    useEffect(() => {
-        if (!ids || ids.length === 0) {
-            setDispensers([]);
-            setLoadingDispensers(false);
-            return;
-        }
-        setLoadingDispensers(true);
-        fetch('http://localhost:3002/api/v1/dispenser/')
-            .then(res => res.json())
-            .then(data => {
-                setDispensers(data);
-                setLoadingDispensers(false);
-            })
-            .catch(() => setLoadingDispensers(false));
-    }, [ids.join(",")]);
-    console.log(dispensers);
     console.log(itemsDelCarrito);
     
 
@@ -63,33 +67,81 @@ function BodyPago({idpruducto, idcarrito}) {
     0
   );
 
-
-    const handPayments = async () => {
-        if (!checked) {
-            alert("Debe seleccionar alguna casilla de Pago.");
-            return;
-        }
-        try {
-            const response = await fetch('http://3.230.107.32:3002/api/v1/payment', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    title: "Producto",
-                    price: (totalCarrito + 1.5).toFixed(2) 
-                })
-            });
-            const data = await response.json();
-            if (data.init_point) {
-                window.location.href = data.init_point; // Redirige al usuario a la página de pago
-            } else {
-                console.error('No se recibió el init_point de pago');
-            }
-        } catch (error) {
-            console.error('Error al procesar el pago:', error);
-        }
+const handPayments = async () => {
+    if (!checked) {
+        alert("Debe seleccionar alguna casilla de Pago.");
+        return;
     }
+
+    setPaymentLoading(true);
+    
+    try {
+        // Verificar que MercadoPago esté inicializado
+        const mpStatus = mercadoPagoService.getStatus();
+        console.log('🔍 Estado de MercadoPago SDK:', mpStatus);
+
+        // Crear una descripción más detallada basada en los items
+        const itemNames = itemsDelCarrito.map(item => item.nombre).join(", ");
+        const description = itemNames ? 
+            `Productos de CineSnacks: ${itemNames}` : 
+            "Deliciosos snacks para disfrutar tu película";
+
+        console.log('🔄 Enviando solicitud de pago...');
+
+        const response = await fetch(config.endpoints.payment, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                title: "Combo CineSnacks",
+                description: description,
+                price: (totalCarrito + 1.5).toFixed(2),
+                category_id: "food",
+                quantity: 1,
+                payer: {
+                    first_name: usuario,
+                    last_name: "CineSnacks",
+                    email: email
+                },
+                // URLs de retorno
+                back_urls: {
+                    success: `${window.location.origin}/payment-success`,
+                    failure: `${window.location.origin}/payment-failure`, 
+                    pending: `${window.location.origin}/payment-pending`
+                },
+                auto_return: "approved"
+            })
+        });
+        
+        const data = await response.json();
+        console.log('📦 Respuesta del servidor:', data);
+        
+        if (data.success && data.data && data.data.init_point) {
+            console.log('✅ Procesando pago con MercadoPago SDK...');
+            
+            // Usar el servicio de MercadoPago para manejar el checkout
+            if (mpStatus.isInitialized) {
+                // Opción 1: Usar redirección segura del SDK
+                mercadoPagoService.redirectToCheckout(data.data.init_point);
+            } else {
+                // Fallback: Redirección tradicional
+                console.log('⚠️ SDK no inicializado, usando redirección tradicional');
+                window.location.href = data.data.init_point;
+            }
+            
+        } else {
+            console.error('❌ No se recibió el init_point de pago');
+            console.error('Estructura recibida:', data);
+            alert('Error al procesar el pago. Por favor, intenta nuevamente.');
+        }
+    } catch (error) {
+        console.error('❌ Error al procesar el pago:', error);
+        alert('Error de conexión. Por favor, verifica tu conexión a internet e intenta nuevamente.');
+    } finally {
+        setPaymentLoading(false);
+    }
+}
 
     return(
         <>
@@ -109,6 +161,7 @@ function BodyPago({idpruducto, idcarrito}) {
                     itemsDelCarrito.map((item, idx) => (
                         <PagoItem
                         key={item.id}
+                        imageUrl={item.imagen}
                         name={item.nombre}
                         units={item.cantidad}
                         total={item.precio}
@@ -122,44 +175,6 @@ function BodyPago({idpruducto, idcarrito}) {
                     )}
                 </div>
                 </ScrollVertical>
-                <div className="mt-4">
-                  <h2 className="text-lg font-semibold mb-2">Dispensadores con stock disponible</h2>
-                  {loadingDispensers ? (
-                    <div className="text-gray-500">Buscando dispensadores...</div>
-                  ) : (
-                    <>
-                      {itemsDelCarrito.length === 0 ? (
-                        <div className="text-gray-500">No hay productos para buscar en dispensadores.</div>
-                      ) : (
-                        ids.map((id, idx) => {
-                          const producto = itemsDelCarrito[idx];
-                          const dispensersWithProduct = dispensers.filter(disp =>
-                            disp.products && disp.products.some(p => String(p.id) === String(id) && p.cantidad > 0)
-                          );
-                          return (
-                            <div key={id} className="mb-4 p-2 border rounded bg-gray-50">
-                              <div className="font-medium text-stone-700">{producto?.nombre || 'Producto'}</div>
-                              {dispensersWithProduct.length > 0 ? (
-                                <ul className="list-disc ml-6">
-                                  {dispensersWithProduct.map(disp => {
-                                    const prod = disp.products.find(p => String(p.id) === String(id));
-                                    return (
-                                      <li key={disp.dispenser_id} className="mb-1">
-                                        <span className="font-semibold">{disp.location}</span> - Stock: {prod.cantidad} - Estado: <span className={disp.status === 'online' ? 'text-green-600' : 'text-red-600'}>{disp.status}</span>
-                                      </li>
-                                    );
-                                  })}
-                                </ul>
-                              ) : (
-                                <div className="text-red-500">No disponible en ningún dispensador.</div>
-                              )}
-                            </div>
-                          );
-                        })
-                      )}
-                    </>
-                  )}
-                </div>
                 <div className="self-stretch p-4 inline-flex flex-col justify-start items-start">
                     <div className="self-stretch py-2 inline-flex justify-between items-start">
                         <div className="inline-flex flex-col justify-start items-start">
@@ -168,7 +183,7 @@ function BodyPago({idpruducto, idcarrito}) {
                         </div>
                         </div>
                         <div className="inline-flex flex-col justify-start items-start">
-                        <div className="text-right justify-start text-stone-900 text-sm font-normal font-['Plus_Jakarta_Sans'] leading-tight">
+                        <div className="text-right justify-start text-stone-500 text-sm font-normal font-['Plus_Jakarta_Sans'] leading-tight">
                            ${totalCarrito}
                         </div>
                         </div>
@@ -180,7 +195,7 @@ function BodyPago({idpruducto, idcarrito}) {
                         </div>
                         </div>
                         <div className="inline-flex flex-col justify-start items-start">
-                        <div className="text-right justify-start text-stone-900 text-sm font-normal font-['Plus_Jakarta_Sans'] leading-tight">
+                        <div className="text-right justify-start text-stone-500 text-sm font-normal font-['Plus_Jakarta_Sans'] leading-tight">
                             $1.50
                         </div>
                         </div>
@@ -192,7 +207,7 @@ function BodyPago({idpruducto, idcarrito}) {
                         </div>
                         </div>
                         <div className="inline-flex flex-col justify-start items-start">
-                        <div className="text-right justify-start text-stone-900 text-sm font-normal font-['Plus_Jakarta_Sans'] leading-tight">
+                        <div className="text-right justify-start text-stone-700 text-sm font-medium font-['Plus_Jakarta_Sans'] leading-tight">
                            ${(totalCarrito + 1.5).toFixed(2)}
                         </div>
                         </div>
@@ -204,10 +219,11 @@ function BodyPago({idpruducto, idcarrito}) {
                 onChange={() => setChecked(!checked)}
                 />
                 <Buttom.Buttom1
-                contexto="Pagar con Mercado"
+                contexto={paymentLoading ? "Procesando..." : "Pagar con Mercado"}
                 type="button"
                 large="w-1/2"
                 onClick={handPayments}
+                disabled={paymentLoading}
                 >
                 </Buttom.Buttom1>
             </div>

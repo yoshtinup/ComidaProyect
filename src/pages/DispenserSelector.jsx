@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import Header from "../../src/componets/Header.jsx";
 import { useNavigate, useLocation} from "react-router-dom";
+import { jwtDecode } from 'jwt-decode';
+import config from '../config/apiConfig';
 function DispenserSelector({ onSelect }) {
   const navigate = useNavigate();
   const [dispensers, setDispensers] = useState([]);
@@ -11,8 +13,27 @@ function DispenserSelector({ onSelect }) {
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const token = params.get("token");
-    if (token) {
-      localStorage.setItem("token", token);
+    
+    // Solo procesar si hay un token en la URL Y no hay uno ya guardado en localStorage
+    if (token && !localStorage.getItem("token")) {
+      try {
+        // Decodificar el token y extraer userId y nfc
+        const decoded = jwtDecode(token);
+        const userIdFromToken = decoded.id || "";
+        const userNfc = decoded.nfc || "";
+        
+        // Guardar todo en localStorage
+        localStorage.setItem("token", token);
+        localStorage.setItem("userId", userIdFromToken.toString());
+        localStorage.setItem("nfc", userNfc);
+      } catch (error) {
+        console.error("Error decoding token:", error);
+        localStorage.setItem("token", token);
+      }
+      
+      navigate("/dispenser-selector", { replace: true });
+    } else if (token && localStorage.getItem("token")) {
+      // Si ya hay un token guardado, solo limpiar la URL sin sobrescribir
       navigate("/dispenser-selector", { replace: true });
     }
   }, [location, navigate]);
@@ -20,7 +41,7 @@ function DispenserSelector({ onSelect }) {
 
   useEffect(() => {
     setLoading(true);
-    fetch("http://localhost:3002/api/v1/dispenser/")
+    fetch(config.endpoints.dispenserList)
       .then((res) => res.json())
       .then((data) => {
         setDispensers(data);

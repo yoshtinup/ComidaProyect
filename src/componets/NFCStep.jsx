@@ -2,14 +2,14 @@ import React from 'react';
 
 function NFCStep({ stepNumber, description }) {
   return (
-    <>
-      <h3 className="text-[#141414] text-lg font-bold leading-tight tracking-[-0.015em] px-4 pb-2 pt-4">
+    <div className="p-3 sm:p-4">
+      <h3 className="text-[#141414] text-base sm:text-lg font-bold leading-tight tracking-[-0.015em] pb-2">
         Paso {stepNumber}
       </h3>
-      <p className="text-[#141414] text-base font-normal leading-normal pb-3 pt-1 px-4">
+      <p className="text-gray-600 text-sm sm:text-base font-normal leading-normal">
         {description}
       </p>
-    </>
+    </div>
   );
 }
 

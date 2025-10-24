@@ -62,19 +62,18 @@ const Form1 = () => {
 
 const Form2 = ({ titulo, subtitulo, children, color, onSubmit }) => {
   return (
-    <div className={`flex-1 flex justify-center items-center px-6 py-10 bg-gradient-to-r ${color}`}>
-      <form
-        onSubmit={onSubmit}
+    <div className={`flex-1 flex justify-center items-center  px-6 py-1 bg-gradient-to-r ${color}`}>
+      <div
         className="w-full max-w-[450px] text-center"
       >
         <h2 className="text-4xl mb-2 text-[#212121] font-bold">{titulo}</h2>
         <p className="text-[#212121] mb-8 text-xl">{subtitulo}</p>
         {children}
-        <div className="flex justify-center gap-4 mt-4">
+        <div className="flex justify-center mb-5 gap-4">
           <a href="#" className="text-2xl text-[#212121] hover:text-gray-700"><FaInstagram /></a>
           <a href="#" className="text-2xl text-[#212121] hover:text-gray-700"><FaFacebook /></a>
         </div>
-      </form>
+      </div>
     </div>
   );
 };

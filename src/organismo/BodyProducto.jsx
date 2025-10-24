@@ -2,11 +2,16 @@ import React, { useState, useRef } from 'react';
 import InputText from '../componets/inputForm/InputText';
 import TextArea from '../componets/inputForm/TextArea';
 import FileInput from '../componets/inputForm/FileInput';
+import config from '../config/apiConfig';
+import ModalExito from '../componets/modal/ModalExito';
+import { useNavigate } from 'react-router-dom';
 
 const FormularioProducto = () => {
   const [fileName, setFileName] = useState('Seleccionar imagen...');
   const [previewUrl, setPreviewUrl] = useState(null);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
   const formRef = useRef();
+  const navigate = useNavigate();
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -35,9 +40,10 @@ const FormularioProducto = () => {
     const descripcion = formData.get('descripcion');
     const cantidad = parseInt(formData.get('cantidad'), 10);
     const precio = parseFloat(formData.get('precio'));
+    const no_apartado = parseInt(formData.get('no_apartado'), 10);
     const imagen = formData.get('imagen');
 
-    if (!nombre || !descripcion || isNaN(cantidad) || isNaN(precio) || !imagen.name) {
+    if (!nombre || !descripcion || isNaN(cantidad) || isNaN(precio) || isNaN(no_apartado) || !imagen.name) {
       alert('Por favor, complete todos los campos del formulario.');
       return;
     }
@@ -52,25 +58,113 @@ const FormularioProducto = () => {
       return;
     }
 
+    if (no_apartado <= 0) {
+      alert('El número de apartado debe ser mayor que cero.');
+      return;
+    }
+
+    // Log para debugging - ver qué datos se envían
+    console.log('Datos a enviar:', {
+      nombre,
+      descripcion,
+      cantidad,
+      precio,
+      no_apartado,
+      imagen: imagen.name,
+      endpoint: config.endpoints.productoRegister,
+      endpointAlt: config.endpoints.productoRegisterAlt
+    });
+
     try {
-      const response = await fetch('http://3.235.82.25:3000/registrar-producto', {
+      // Intenta primero con el endpoint principal
+      let response = await fetch(config.endpoints.productoRegister, {
         method: 'POST',
         body: formData
       });
 
+      // Si falla, intenta con el endpoint alternativo
+      if (!response.ok && config.endpoints.productoRegisterAlt) {
+        console.log('Intentando con endpoint alternativo...');
+        response = await fetch(config.endpoints.productoRegisterAlt, {
+          method: 'POST',
+          body: formData
+        });
+      }
+
       const data = await response.json();
 
       if (response.ok) {
-        alert('Producto registrado correctamente');
         form.reset();
         setFileName('Seleccionar imagen...');
         setPreviewUrl(null);
+        setShowSuccessModal(true); // Mostrar modal de éxito
       } else {
-        alert('Error: ' + (data.error || 'No se pudo registrar el producto'));
+        // Manejo más específico de errores del servidor
+        console.error('Error del servidor:', {
+          status: response.status,
+          statusText: response.statusText,
+          data: data
+        });
+        
+        let errorMessage = 'Error del servidor: ';
+        
+        if (response.status === 400) {
+          errorMessage += 'Datos inválidos. ';
+        } else if (response.status === 401) {
+          errorMessage += 'No autorizado. ';
+        } else if (response.status === 403) {
+          errorMessage += 'Acceso prohibido. ';
+        } else if (response.status === 404) {
+          errorMessage += 'Endpoint no encontrado. ';
+        } else if (response.status === 500) {
+          errorMessage += 'Error interno del servidor. ';
+        } else {
+          errorMessage += `Código ${response.status}. `;
+        }
+        
+        // Agregar detalles específicos del error si están disponibles
+        if (data.error) {
+          errorMessage += `Detalle: ${data.error}`;
+        } else if (data.message) {
+          errorMessage += `Mensaje: ${data.message}`;
+        } else if (data.details) {
+          errorMessage += `Detalles: ${JSON.stringify(data.details)}`;
+        } else {
+          errorMessage += `Respuesta completa: ${JSON.stringify(data)}`;
+        }
+        
+        alert(errorMessage);
       }
     } catch (error) {
-      alert('Error de red o del servidor');
+      console.error('Error completo:', {
+        name: error.name,
+        message: error.message,
+        stack: error.stack,
+        url: config.endpoints.productoRegister
+      });
+      
+      let errorMessage = 'Error de conexión: ';
+      
+      if (error.name === 'TypeError' && error.message.includes('fetch')) {
+        errorMessage += 'No se pudo conectar al servidor. Verifica tu conexión a internet.';
+      } else if (error.name === 'SyntaxError') {
+        errorMessage += 'El servidor devolvió una respuesta inválida.';
+      } else {
+        errorMessage += `${error.message}. URL: ${config.endpoints.productoRegister}`;
+      }
+      
+      alert(errorMessage);
     }
+  };
+
+  const handleGoToAdmin = () => {
+    setShowSuccessModal(false);
+    navigate('/panel-admin');
+  };
+
+  const handleRegisterAnother = () => {
+    setShowSuccessModal(false);
+    // El formulario ya está limpio, solo cerramos el modal
   };
 
   return (
@@ -93,19 +187,22 @@ const FormularioProducto = () => {
             <TextArea id="descripcion" label="Descripción:" placeholder="Ingrese una descripción del producto" />
           </div>
           <div className='max-w-[480px] mb-4'>
-            <InputText id="precio" label="Precio:" type="number" step="0.01" placeholder="Precio en €" />
+            <InputText id="precio" label="Precio:" type="number" step="0.01" placeholder="Precio en MXN" />
           </div>
           <div className='max-w-[480px] mb-4'>
             <InputText id="cantidad" label="Cantidad:" type="number" placeholder="Cantidad en stock" />
           </div>
           <div className='max-w-[480px] mb-4'>
-            <InputText id="peso" label="Peso:" type="number" step="0.01" placeholder="Peso en kg" />
+            <InputText id="peso" label="Peso:" type="number" step="0.01" placeholder="Peso en gr" />
           </div>
           <div className='max-w-[480px] mb-4'>
             <InputText id="categoria" label="Categoría:" placeholder="Ingrese la categoría del producto" />
           </div>
           <div className='max-w-[480px] mb-4'>
-            <InputText id="ingreso" label="Ingreso:" type="number" step="0.01" placeholder="Ingreso en €" />
+            <InputText id="no_apartado" label="No. Apartado:" type="number" placeholder="Número de apartado" />
+          </div>
+          <div className='max-w-[480px] mb-4'>
+            <InputText id="ingreso" label="Ingreso:" type="number" step="0.01" placeholder="Ingreso en MXN" />
           </div>
 
           <FileInput onChange={handleImageChange} previewUrl={previewUrl} />
@@ -121,6 +218,17 @@ const FormularioProducto = () => {
         <div className="mt-6 text-sm text-gray-400 text-center">
           Todos los campos son obligatorios. La imagen debe ser en formato JPG, PNG o GIF.
         </div>
+
+        {/* Modal de éxito personalizado */}
+        {showSuccessModal && (
+          <ModalExito
+            mensaje="¡Producto registrado correctamente! ¿Qué deseas hacer ahora?"
+            onPrimaryAction={handleGoToAdmin}
+            onSecondaryAction={handleRegisterAnother}
+            textoPrimario="Ir al Panel Admin"
+            textoSecundario="Registrar otro producto"
+          />
+        )}
       </div>
     </div>
   );

@@ -4,6 +4,7 @@
  */
 
 import { verifyNFCToken, exportNFCForReader } from '../services/nfcService';
+import config from '../config/apiConfig';
 
 // Function to read NFC data when a card is presented to the reader
 export const readNFCCard = async (cardId) => {
@@ -61,7 +62,7 @@ export const processNFCTransaction = async (cardId, transactionData) => {
     }
     
     // Process the transaction with your API
-    const response = await fetch('http://localhost:3002/api/v1/transactions', {
+    const response = await fetch(config.endpoints.transactions, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

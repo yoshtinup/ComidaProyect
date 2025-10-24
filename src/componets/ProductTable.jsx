@@ -3,6 +3,7 @@ import axios from 'axios';
 import EditProductModal from './EditProductModal';
 import ScrollVertical from './scroll/ScrollVertical';
 import ModalConfirmacion from './modal/ModalConfirmacion';
+import config from '../config/apiConfig';
 const ProductTable = () => {
   const [products, setProducts] = useState([]);
   const [showDesc, setShowDesc] = useState({ open: false, text: '' });
@@ -11,7 +12,7 @@ const ProductTable = () => {
 
   const fetchProducts = async () => {
     try {
-      const res = await axios.get('http://3.230.107.32:3002/api/v1/producto');
+      const res = await axios.get(config.endpoints.productos);
       setProducts(res.data);
     } catch (err) {
       console.error('Error al cargar productos:', err);
@@ -30,6 +31,7 @@ const ProductTable = () => {
     { title: 'Peso', key: 'peso', className: 'w-[70px] flex-none text-center' },
     { title: 'Categoría', key: 'categoria', className: 'w-[100px] flex-none text-center' },
     { title: 'Ingresos', key: 'ingreso', className: 'w-[90px] flex-none text-center' },
+    { title: 'No. Apartado', key: 'no_apartado', className: 'w-[90px] flex-none text-center' },
     { title: 'Imagen', key: 'imagen', className: 'w-[70px] flex-none text-center' },
     { title: 'Acciones', key: 'acciones', className: 'w-[90px] flex-none text-center' }
   ];
@@ -68,7 +70,7 @@ const ProductTable = () => {
         formData.append('imagen', editForm.imagen);
       }
       await axios.put(
-        `http://3.235.82.25:3000/actualizar-producto/${id}`,
+        config.endpoints.productoUpdateAlt(id),
         formData,
         { headers: { 'Content-Type': 'multipart/form-data' } }
       );
@@ -87,7 +89,7 @@ const ProductTable = () => {
   const eliminarProducto = async () => {
     try {
       const id = productoSeleccionado._id || productoSeleccionado.id;
-      await axios.delete(`http://3.235.82.25:3000/eliminar-producto/${id}`);
+      await axios.delete(config.endpoints.productoDeleteAlt(id));
       fetchProducts(); // recarga la lista
       setProductoSeleccionado(null); // cerrar el modal
     } catch (error) {
@@ -120,7 +122,7 @@ const ProductTable = () => {
                 >
                   {col.key === 'imagen' ? (
                     <img
-                      src={`http://3.235.82.25:3000/imagenes/${product[col.key]}`}
+                      src={`http://35.169.179.247:3001/imagen/${product[col.key]}`}
                       alt={product.nombre}
                       className="max-h-10 max-w-[60px] object-contain mx-auto"
                     />

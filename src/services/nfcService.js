@@ -3,6 +3,7 @@
  * This service handles NFC token generation and related functionality
  * for the RF1D reader to consume.
  */
+import config from '../config/apiConfig';
 
 // Generate a unique NFC token with required format for RF1D readers
 export const generateNFCToken = async () => {
@@ -59,7 +60,7 @@ const generateUniqueId = () => {
 // Function to verify an NFC token (for the reader)
 export const verifyNFCToken = async (tokenId) => {
   try {
-    const response = await fetch(`http://localhost:3002/api/v1/nfc/${tokenId}`);
+    const response = await fetch(config.endpoints.nfc(tokenId));
     if (!response.ok) {
       throw new Error('Token verification failed');
     }

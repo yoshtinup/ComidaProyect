@@ -8,7 +8,7 @@ function Footer() {
           <div className="text-neutral-500 text-sm sm:text-base">Política de privacidad</div>
         </div>
         <div className="text-center text-neutral-500 text-sm sm:text-base">
-          © 2024 CineSnacks. Todos los derechos reservados.
+          © 2025 CineSnacks. Todos los derechos reservados.
         </div>
       </div>
     </div>

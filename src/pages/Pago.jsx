@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
-import HeaderPago from "../componets/HeaderPago";
+import Header from "../componets/Header";
 import BodyPago from "../organismo/BodyPago";
 import { jwtDecode } from "jwt-decode";
+import config from "../config/apiConfig";
 
 function Pago() {
     const [userData, setUserData] = useState(null);
@@ -26,7 +27,7 @@ function Pago() {
 
     useEffect(() => {
         if (userData && userData.id) {
-            fetch("http://3.230.107.32:3002/api/v1/carrito")
+            fetch(config.endpoints.carritoList)
                 .then(res => res.json())
                 .then(data => {
                     const filtrados = data.filter(item => String(item.iduser) === String(userData.id));
@@ -38,7 +39,7 @@ function Pago() {
 
     return(
         <>
-        <HeaderPago></HeaderPago>
+        <Header></Header>
         <BodyPago
             idpruducto={carritos.map(c => c.idproducto)}
             idcarrito={carritos.map(c => c.id)}

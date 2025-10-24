@@ -3,6 +3,7 @@ const Input1 = ({name, type, contexto, value, onChange}) => {
     <div className='mb-5 text-left'>
         <label className="hidden">{name}</label>
         <input
+        name={name}
         type={type}
         placeholder={contexto}
         value={value}

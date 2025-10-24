@@ -1,7 +1,11 @@
 import { useEffect, useState } from 'react';
+import CineSnacksLoader from '../componets/loader/CineSnacksLoader';
 import { useNavigate } from 'react-router-dom';
+import EmptyState from '../componets/EmptyState';
 import axios from 'axios';
 import Header from '../componets/Header';
+import Buttom from '../componets/bottom/Buttom';
+import config from '../config/apiConfig';
 function MyOrders() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -21,7 +25,7 @@ function MyOrders() {
         return;
       }
 
-      const response = await axios.get(`http://localhost:3002/api/v1/pago/user/${userId}`);
+      const response = await axios.get(config.endpoints.ordersByUser(userId));
       setOrders(response.data);
       setLoading(false);
     } catch (err) {
@@ -75,11 +79,10 @@ function MyOrders() {
 
   if (loading) {
     return (
-      <div className="relative flex size-full min-h-screen flex-col bg-neutral-50 group/design-root overflow-x-hidden font-['Plus_Jakarta_Sans','Noto_Sans',sans-serif]">
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900 mx-auto mb-4"></div>
-            <p className="text-lg text-gray-600">Cargando pedidos...</p>
+      <div className="relative flex size-full min-h-screen w-full flex-col bg-neutral-50 group/design-root overflow-x-hidden font-['Plus_Jakarta_Sans','Noto_Sans',sans-serif]">
+        <div className="flex items-center justify-center min-h-screen w-full">
+          <div className="w-full flex justify-center">
+            <CineSnacksLoader texto="Cargando pedidos..." />
           </div>
         </div>
       </div>
@@ -114,13 +117,30 @@ function MyOrders() {
         {/* Main Content */}
         <div className="px-10 flex flex-1 justify-center py-5">
           <div className="layout-content-container flex flex-col max-w-[1200px] flex-1">
-            <div className="flex flex-wrap justify-between gap-3 p-4">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 p-4">
               <div className="flex min-w-72 flex-col gap-3">
-                <h1 className="text-[#141414] text-4xl font-black leading-tight tracking-[-0.033em]">
+                <h1 className="text-[#141414] text-3xl sm:text-4xl font-black leading-tight tracking-[-0.033em]">
                   Mis Pedidos
                 </h1>
-                <p className="text-[#141414] text-base font-normal leading-normal">
+                <p className="text-[#141414] text-sm sm:text-base font-normal leading-normal">
                   Aquí puedes ver el historial de todos tus pedidos realizados.
+                </p>
+              </div>
+              
+              {/* Botón para gestionar órdenes NFC */}
+              <div className="w-full sm:w-auto flex flex-col gap-2">
+                <div className="relative">
+                  <Buttom.Buttom1
+                    contexto="🔥 Gestionar órdenes NFC"
+                    large="w-full sm:w-64"
+                    onClick={() => navigate('/order-management')}
+                  />
+                  <div className="absolute -top-1 -right-1 bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full font-bold animate-pulse">
+                    Nuevo
+                  </div>
+                </div>
+                <p className="text-xs text-center text-gray-500 hidden sm:block">
+                  Administra pedidos pendientes con NFC
                 </p>
               </div>
             </div>
@@ -128,16 +148,27 @@ function MyOrders() {
             {/* Orders List */}
             <div className="px-4 py-3">
               {orders.length === 0 ? (
-                <div className="text-center py-12">
-                  <div className="text-6xl mb-4">🛒</div>
-                  <h3 className="text-xl font-bold text-gray-600 mb-2">No tienes pedidos aún</h3>
-                  <p className="text-gray-500 mb-6">¡Es hora de hacer tu primer pedido!</p>
-                  <button
-                    onClick={() => navigate('/snacks')}
-                    className="bg-black text-white px-6 py-2 rounded-lg hover:bg-gray-800 transition-colors"
-                  >
-                    Explorar Snacks
-                  </button>
+                <div className="flex flex-col items-center justify-center py-16 space-y-6">
+                  <EmptyState 
+                    icon="📦" 
+                    title="No tienes pedidos aún" 
+                    description="¡Haz tu primer pedido o gestiona órdenes existentes con NFC!"
+                    buttonText="Hacer pedido"
+                    buttonRoute="/home"
+                  />
+                  
+                  {/* Botón secundario para gestión NFC */}
+                  <div className="w-full max-w-sm">
+                    <button
+                      onClick={() => navigate('/order-management')}
+                      className="bg-white text-black w-full p-4 border border-gray-200 rounded-lg cursor-pointer flex items-center justify-center gap-3 text-sm font-medium hover:bg-gray-50 transition-colors duration-200"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0" />
+                      </svg>
+                      Gestionar con NFC
+                    </button>
+                  </div>
                 </div>
               ) : (
                 <div className="grid gap-4">

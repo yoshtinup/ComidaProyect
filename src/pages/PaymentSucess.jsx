@@ -1,6 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
+import CineSnacksLoader from '../componets/scroll/ScrollVertical';
 import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
+import config from '../config/apiConfig';
 
 function PaymentSuccess() {
   const [loading, setLoading] = useState(true);
@@ -8,17 +10,26 @@ function PaymentSuccess() {
   const [orderDetails, setOrderDetails] = useState(null);
   const navigate = useNavigate();
   const location = useLocation();
+  const hasProcessed = useRef(false);
   
   useEffect(() => {
     const completePayment = async () => {
+      if (hasProcessed.current) return; // Evitar duplicados
+      hasProcessed.current = true;
+      
       try {
         // Get user ID from localStorage or your auth context
         const userId = localStorage.getItem('userId');
+        const token = localStorage.getItem('token');
         const selectedDispenser = localStorage.getItem('selectedDispenserId');
         // Call your API to complete the payment
-        const response = await axios.post('http://localhost:3002/api/v1/pago/complete', {
+        const response = await axios.post(config.endpoints.paymentComplete, {
           user_id: userId,
           dispenser_id: selectedDispenser // or any identifier you want to use
+        }, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
         });
         
         setOrderDetails(response.data);
@@ -27,6 +38,7 @@ function PaymentSuccess() {
         console.error('Error completing payment:', err);
         setError('Failed to process your order. Please contact support.');
         setLoading(false);
+        hasProcessed.current = false; // Reset en caso de error para permitir retry
       }
     };
     
@@ -63,10 +75,7 @@ function PaymentSuccess() {
     return (
       <div className="relative flex size-full min-h-screen flex-col bg-neutral-50 group/design-root overflow-x-hidden font-['Plus_Jakarta_Sans','Noto_Sans',sans-serif]">
         <div className="flex items-center justify-center min-h-screen">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900 mx-auto mb-4"></div>
-            <p className="text-lg text-gray-600">Procesando tu pedido...</p>
-          </div>
+          <CineSnacksLoader texto="Procesando tu pedido..." />
         </div>
       </div>
     );
