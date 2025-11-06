@@ -62,7 +62,7 @@ function DispenserSelector({ onSelect }) {
   };
 
   const filteredDispensers = dispensers.filter((d) =>
-    d.location.toLowerCase().includes(search.toLowerCase())
+    d.location?.toLowerCase().includes(search.toLowerCase())
   );
 
   return (
