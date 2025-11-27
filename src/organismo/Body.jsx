@@ -3,6 +3,7 @@ import axios from 'axios';
 import videoFile from '../assets/img/perfil.gif';
 import ProductoCard from '../componets/ProductoCard';
 import ModalNotificacion from '../componets/modal/ModalNotificacion';
+import CartSideModal from '../componets/modal/CartSideModal';
 import CineSnacksLoader from '../componets/loader/CineSnacksLoader';
 import config from '../config/apiConfig';
 
@@ -11,6 +12,11 @@ const Body = ({iduser, nombre}) => {
   const [modalOpen, setModalOpen] = useState(false);
   const [modalMessage, setModalMessage] = useState('Producto agregado al carrito');
   const [loading, setLoading] = useState(true);
+  
+  // Estados para el modal del carrito
+  const [cartModalOpen, setCartModalOpen] = useState(false);
+  const [addedProduct, setAddedProduct] = useState(null);
+  const [cartItemsCount, setCartItemsCount] = useState(0);
 
   useEffect(() => {
     const fetchProductos = async () => {
@@ -42,7 +48,30 @@ const Body = ({iduser, nombre}) => {
       }
     };
     fetchProductos();
+    
+    // Obtener cantidad de items en el carrito
+    fetchCartCount();
   }, []);
+  
+  // Función para obtener el conteo del carrito
+  const fetchCartCount = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token || !iduser) return;
+      
+      const response = await axios.get(config.endpoints.carritoByUser(iduser), {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (response.data.success) {
+        setCartItemsCount(response.data.data.itemCount || 0);
+      }
+    } catch (error) {
+      console.error('Error al obtener conteo del carrito:', error);
+    }
+  };
 
   const handleAddToCart = async (id) => {
     const now = new Date();
@@ -50,6 +79,9 @@ const Body = ({iduser, nombre}) => {
     const hora = now.toTimeString().slice(0, 8);  // HH:MM:SS
 
     try {
+      // Encontrar el producto agregado para mostrarlo en el modal
+      const productoAgregado = productos.find(p => p.id === id);
+      
       // Primero verificar si el producto ya está en el carrito
       const existingCartRes = await axios.get(config.endpoints.carritoByUser(iduser));
       const existingItems = existingCartRes.data || [];
@@ -64,7 +96,6 @@ const Body = ({iduser, nombre}) => {
           cantidad: newQuantity
         });
         setModalMessage('Cantidad actualizada en el carrito');
-        setModalOpen(true);
       } else {
         // Si el producto no existe, agregarlo como nuevo
         const data = {
@@ -77,8 +108,20 @@ const Body = ({iduser, nombre}) => {
         
         await axios.post(config.endpoints.carritoAdd, data);
         setModalMessage('Producto agregado al carrito');
-        setModalOpen(true);
       }
+      
+      // Actualizar conteo del carrito
+      await fetchCartCount();
+      
+      // Mostrar el modal lateral con la información del producto
+      if (productoAgregado) {
+        setAddedProduct({
+          ...productoAgregado,
+          imagen: config.endpoints.productImage(productoAgregado.imagen)
+        });
+        setCartModalOpen(true);
+      }
+      
     } catch (error) {
       console.error('Error al agregar al carrito:', error);
       // Si falla la verificación, intentar agregar normalmente
@@ -92,9 +135,21 @@ const Body = ({iduser, nombre}) => {
         };
         
         await axios.post(config.endpoints.carritoAdd, data);
-        setModalOpen(true);
+        
+        // Buscar el producto para el modal
+        const productoAgregado = productos.find(p => p.id === id);
+        if (productoAgregado) {
+          setAddedProduct({
+            ...productoAgregado,
+            imagen: config.endpoints.productImage(productoAgregado.imagen)
+          });
+          setCartModalOpen(true);
+        }
+        
+        await fetchCartCount();
       } catch (fallbackError) {
         console.error('Error en fallback al agregar al carrito:', fallbackError);
+        setModalOpen(true);
       }
     }
   };
@@ -105,13 +160,22 @@ const Body = ({iduser, nombre}) => {
 
   return (
     <div className="w-full flex flex-col items-center gap-6 sm:gap-8 pb-8">
-      {/* Modal de notificación */}
+      {/* Modal de notificación (mantener para compatibilidad) */}
       {modalOpen && (
         <ModalNotificacion
           mensaje={modalMessage}
           onClose={() => setModalOpen(false)}
         />
       )}
+      
+      {/* Modal lateral del carrito tipo Mercado Libre */}
+      <CartSideModal
+        isOpen={cartModalOpen}
+        onClose={() => setCartModalOpen(false)}
+        product={addedProduct}
+        cartItemsCount={cartItemsCount}
+      />
+      
       {/* Perfil */}
       <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-5 mt-5 px-4">
         <img className="w-24 h-24 sm:w-32 sm:h-28 md:w-36 md:h-32 rounded-full object-cover" src={videoFile} alt="Perfil" />

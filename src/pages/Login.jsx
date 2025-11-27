@@ -14,6 +14,9 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [modal, setModal] = useState(false);
   const [loader, setLoader] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [errorType, setErrorType] = useState('');
+  const [fieldErrors, setFieldErrors] = useState({ gmail: false, password: false });
   const navigate = useNavigate();
   const jwt_decode = jwtDecode; 
   const location = useLocation();
@@ -86,34 +89,46 @@ if (token) {
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    
+    // Limpiar errores previos
+    setErrorMessage('');
+    setErrorType('');
+    setFieldErrors({ gmail: false, password: false });
     setLoader(true);
+    
     try {
       const response = await axios.post(config.endpoints.userLogin, {
         gmail,
         password
       });
 
-      const { token } = response.data;
-      if (!token) {
+      // ✅ CORRECTO: El token está en response.data.data.token
+      const result = response.data;
+      
+      if (!result.success || !result.data || !result.data.token) {
         console.error('Login failed: Token not received');
         setLoader(false);
+        setErrorMessage('No se recibió el token de autenticación');
+        setErrorType('TOKEN_ERROR');
         setModal(true); 
         return;
       }
-      const userId = response.data.userId;
 
-      // Guardar userId en localStorage
-      localStorage.setItem('userId', userId);
+      // Extraer datos de result.data
+      const { token, userId, nombre, nfc, usuario, id_role_fk } = result.data;
 
-      const nfc = response.data.nfc || "";
-      // Guardar NFC en localStorage
-      localStorage.setItem('nfc', nfc);
-
-      // Guardar token en localStorage
+      // Guardar datos en localStorage
       localStorage.setItem('token', token);
+      localStorage.setItem('userId', userId.toString());
+      localStorage.setItem('nfc', nfc || "");
+      localStorage.setItem('userName', nombre || "");
+      localStorage.setItem('userEmail', gmail);
+      
+      if (usuario) localStorage.setItem('username', usuario);
 
+      // Decodificar token para obtener el rol
       const decoded = jwt_decode(token);
-      const role = decoded.id_role_fk;
+      const role = decoded.id_role_fk || id_role_fk;
 
       // Redirigir según el tipo
       if (role === 2) {
@@ -126,9 +141,71 @@ if (token) {
 
     } catch (error) {
       setLoader(false);
-      setModal(true);
       console.error('Login failed:', error);
+      console.error('Error details:', error.response?.data || error.message);
+      
+      // Manejar errores específicos del API
+      handleLoginError(error.response?.data || { error: 'NETWORK_ERROR', message: 'Error de conexión' });
     }
+  };
+
+  // Función para manejar errores específicos del API
+  const handleLoginError = (errorData) => {
+    const errorCode = errorData.error;
+    const message = errorData.message;
+    
+    setErrorMessage(message);
+    setErrorType(errorCode);
+    
+    switch (errorCode) {
+      case 'MISSING_CREDENTIALS':
+        setFieldErrors({ gmail: true, password: true });
+        break;
+        
+      case 'MISSING_EMAIL':
+        setFieldErrors({ gmail: true, password: false });
+        break;
+
+      case 'ER_DUP_ENTRY':
+        setFieldErrors({ gmail: true, password: false });
+        break;  
+        
+      case 'MISSING_PASSWORD':
+        setFieldErrors({ gmail: false, password: true });
+        break;
+        
+      case 'INVALID_EMAIL_FORMAT':
+        setFieldErrors({ gmail: true, password: false });
+        break;
+        
+      case 'PASSWORD_TOO_SHORT':
+        setFieldErrors({ gmail: false, password: true });
+        break;
+        
+      case 'USER_NOT_FOUND':
+        setFieldErrors({ gmail: true, password: false });
+        break;
+        
+      case 'INVALID_PASSWORD':
+        setFieldErrors({ gmail: false, password: true });
+        setPassword(''); // Limpiar contraseña
+        break;
+        
+      case 'INVALID_CREDENTIALS':
+        setFieldErrors({ gmail: true, password: true });
+        setPassword(''); // Limpiar contraseña
+        break;
+        
+      case 'SERVER_ERROR':
+        setFieldErrors({ gmail: false, password: false });
+        break;
+        
+      default:
+        setFieldErrors({ gmail: false, password: false });
+        setErrorMessage(message || 'Ocurrió un error inesperado');
+    }
+    
+    setModal(true);
   };
 
   if (loader) {
@@ -137,7 +214,7 @@ if (token) {
 
   return (
     <>
-      {/* Modal de error - ORIGINAL CONSERVADO */}
+      {/* Modal de error - MEJORADO CON MENSAJES ESPECÍFICOS */}
       {modal && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 animate-fadeIn">
           <div className="bg-white rounded-2xl p-8 max-w-md w-full mx-4 text-center transform animate-scaleIn shadow-2xl border border-gray-100">
@@ -149,15 +226,53 @@ if (token) {
               <div className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 rounded-full animate-ping opacity-75"></div>
             </div>
             
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Error de inicio de sesión</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">
+              {errorType === 'USER_NOT_FOUND' ? '¡Usuario no encontrado!' : 'Error de inicio de sesión'}
+            </h2>
             <p className="text-gray-600 mb-6 leading-relaxed">
-              Por favor, verifica tus credenciales e intenta nuevamente. Asegúrate de que tu información sea correcta.
+              {errorMessage || 'Por favor, verifica tus credenciales e intenta nuevamente.'}
             </p>
             
-            <div className="flex gap-3 justify-center">
+            {/* Sugerencias específicas según el error */}
+            {errorType === 'INVALID_EMAIL_FORMAT' && (
+              <p className="text-sm text-gray-500 mb-4 italic">Ejemplo: usuario@correo.com</p>
+            )}
+            
+            {errorType === 'PASSWORD_TOO_SHORT' && (
+              <p className="text-sm text-gray-500 mb-4 italic">La contraseña debe tener al menos 4 caracteres</p>
+            )}
+            
+            <div className="flex flex-col gap-3 justify-center">
+              {/* Botón de crear cuenta si usuario no existe */}
+              {errorType === 'USER_NOT_FOUND' && (
+                <button
+                  onClick={() => {
+                    setModal(false);
+                    navigate('/registro', { state: { email: gmail } });
+                  }}
+                  className="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 transform hover:scale-105 shadow-lg"
+                >
+                  ¿Quieres crear una cuenta?
+                </button>
+              )}
+              
+              {/* Link de recuperar contraseña si contraseña incorrecta */}
+              {errorType === 'INVALID_PASSWORD' && (
+                <a
+                  href="#"
+                  className="text-sm text-blue-600 hover:text-blue-700 mb-2"
+                >
+                  ¿Olvidaste tu contraseña?
+                </a>
+              )}
+              
               <button
-                onClick={() => setModal(false)}
-                className="bg-red-500 hover:bg-red-600 text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 transform hover:scale-105 shadow-lg flex items-center gap-2"
+                onClick={() => {
+                  setModal(false);
+                  setErrorMessage('');
+                  setErrorType('');
+                }}
+                className="bg-red-500 hover:bg-red-600 text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 transform hover:scale-105 shadow-lg flex items-center gap-2 justify-center"
               >
                 <X className="w-4 h-4" />
                 Cerrar
@@ -243,11 +358,21 @@ if (token) {
                       id="email"
                       type="email"
                       value={gmail}
-                      onChange={(e) => setGmail(e.target.value)}
-                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white"
+                      onChange={(e) => {
+                        setGmail(e.target.value);
+                        setFieldErrors(prev => ({ ...prev, gmail: false }));
+                      }}
+                      className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 transition-all duration-200 bg-gray-50 focus:bg-white ${
+                        fieldErrors.gmail 
+                          ? 'border-red-500 focus:ring-red-500 bg-red-50' 
+                          : 'border-gray-300 focus:ring-black focus:border-transparent'
+                      }`}
                       placeholder="tu@email.com"
                       required
                     />
+                    {fieldErrors.gmail && (
+                      <p className="text-xs text-red-500 mt-1">Este campo tiene un error</p>
+                    )}
                   </div>
                 </div>
 
@@ -264,8 +389,15 @@ if (token) {
                       id="password"
                       type={showPassword ? 'text' : 'password'}
                       value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white"
+                      onChange={(e) => {
+                        setPassword(e.target.value);
+                        setFieldErrors(prev => ({ ...prev, password: false }));
+                      }}
+                      className={`w-full pl-10 pr-12 py-3 border rounded-lg focus:ring-2 transition-all duration-200 bg-gray-50 focus:bg-white ${
+                        fieldErrors.password 
+                          ? 'border-red-500 focus:ring-red-500 bg-red-50' 
+                          : 'border-gray-300 focus:ring-black focus:border-transparent'
+                      }`}
                       placeholder="••••••••"
                       required
                     />
@@ -281,7 +413,11 @@ if (token) {
                       )}
                     </button>
                   </div>
-                  <p className="text-xs text-gray-500 mt-1">Contraseña debe tener más de 8 caracteres</p>
+                  {fieldErrors.password ? (
+                    <p className="text-xs text-red-500 mt-1">Este campo tiene un error</p>
+                  ) : (
+                    <p className="text-xs text-gray-500 mt-1">Contraseña debe tener más de 8 caracteres</p>
+                  )}
                 </div>
 
                 {/* Recordar sesión y olvidé contraseña */}

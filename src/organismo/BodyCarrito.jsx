@@ -1,4 +1,4 @@
-  import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
   import EmptyState from "../componets/EmptyState";
   import { useNavigate } from "react-router-dom";
   import TitlePanel from "../componets/title/TitlePanel";
@@ -7,82 +7,23 @@
   import Buttom from "../componets/bottom/Buttom";
 import CineSnacksLoader from "../componets/loader/CineSnacksLoader";
 import config from "../config/apiConfig";
-  function BodyCarrito({ idpruducto, idcarrito }) {
-    const [itemsDelCarrito, setItemsDelCarrito] = useState([]);
-    const [quantities, setQuantities] = useState({}); // Estado para las cantidades
-    const [loading, setLoading] = useState(true);
-    const ids = idpruducto || [];
-    const idc = idcarrito || [];
+
+  function BodyCarrito({ cartData, loading, onRefreshCart, userId }) {
     const navigate = useNavigate();
 
-    useEffect(() => {
-      console.log("ID del producto:", ids);
-      console.log("ID del carrito: ",idc)
-      if (!ids || ids.length === 0) {
-        setItemsDelCarrito([]);
-        setQuantities({});
-        setLoading(false);
-        return;
-      }
-      setLoading(true);
-      Promise.all(
-        ids.map((id) =>
-          fetch(config.endpoints.producto(id)).then((res) =>
-            res.json()
-          )
-        )
-      )
-        .then((data) => {
-          setItemsDelCarrito(data);
-          // Inicializar cantidades en 1 para cada producto
-          const initialQuantities = {};
-          idc.forEach((carritoId) => {
-            initialQuantities[carritoId] = 1;
-          });
-          setQuantities(initialQuantities);
-          setLoading(false);
-        })
-        .catch(() => setLoading(false));
-    }, [ids.join(",")]); // Solo se ejecuta cuando cambian los IDs
+    if (loading) {
+      return (
+        <div className="flex justify-center w-full min-h-screen bg-neutral-50 px-2 sm:px-4">
+          <div className="w-full max-w-2xl lg:max-w-3xl py-4 sm:py-6 flex items-center justify-center">
+            <CineSnacksLoader/>
+          </div>
+        </div>
+      );
+    }
 
-    // Calcular total considerando las cantidades
-    const totalCarrito = itemsDelCarrito.reduce(
-      (acum, item, idx) => {
-        const carritoId = idc[idx];
-        const quantity = quantities[carritoId] || 1;
-        return acum + (parseFloat(item.precio) * quantity || 0);
-      },
-      0
-    );
-
-    const handleRemoveItem = (idcarritoToRemove) => {
-      // Remueve el id del carrito y el producto correspondiente
-      const idxToRemove = idc.findIndex(id => id === idcarritoToRemove);
-      if (idxToRemove !== -1) {
-        const newIds = [...ids];
-        const newIdc = [...idc];
-        newIds.splice(idxToRemove, 1);
-        newIdc.splice(idxToRemove, 1);
-        // Actualiza los arrays (esto puede requerir que los arrays vengan de props y se actualicen en el padre real)
-        setItemsDelCarrito(prev => prev.filter((_, i) => i !== idxToRemove));
-        // Remover cantidad del estado
-        setQuantities(prev => {
-          const newQuantities = { ...prev };
-          delete newQuantities[idcarritoToRemove];
-          return newQuantities;
-        });
-        // Si los ids/idc vienen de props, deberías notificar al padre real aquí
-      }
-    };
-
-    const handleQuantityChange = (carritoId, newQuantity) => {
-      setQuantities(prev => ({
-        ...prev,
-        [carritoId]: newQuantity
-      }));
-    };
-
-
+    const items = cartData?.items || [];
+    const total = parseFloat(cartData?.total || 0);
+    const itemCount = cartData?.itemCount || 0;
 
     return (
       <div className="flex justify-center w-full min-h-screen bg-neutral-50 px-2 sm:px-4">
@@ -90,20 +31,22 @@ import config from "../config/apiConfig";
           <TitlePanel.Title title="Carrito de Compras" />
           <ScrollVertical>
             <div className="flex flex-col bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-              {loading ? (
-                <CineSnacksLoader/>
-              ) : itemsDelCarrito.length > 0 ? (
-                itemsDelCarrito.map((item, idx) => (
+              {items.length > 0 ? (
+                items.map((item) => (
                   <CarritoItem
                     key={item.id}
-                    imageUrl={config.endpoints.productImage(item.imagen)}
+                    imageUrl={item.imagen || config.endpoints.productImage('placeholder.png')}
                     name={item.nombre}
-                    units={item.cantidad}
-                    total={item.precio}
-                    idcarrito={idc[idx]}
-                    quantity={quantities[idc[idx]] || 1}
-                    onRemove={handleRemoveItem}
-                    onQuantityChange={handleQuantityChange}
+                    description={item.descripcion}
+                    price={parseFloat(item.precio)}
+                    stock={item.stock_disponible}
+                    units={item.peso}
+                    idcarrito={item.id}
+                    idproducto={item.idproducto}
+                    quantity={item.cantidad}
+                    subtotal={parseFloat(item.subtotal)}
+                    onRefreshCart={onRefreshCart}
+                    userId={userId}
                   />
                 ))
               ) : (
@@ -118,7 +61,7 @@ import config from "../config/apiConfig";
             </div>
           </ScrollVertical>
 
-          { itemsDelCarrito.length > 0 && (
+          { items.length > 0 && (
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-3 sm:p-4">
             
           <TitlePanel.Subtitle subtitle="Resumen de tu carrito" />
@@ -126,10 +69,10 @@ import config from "../config/apiConfig";
           <div className="mt-3 space-y-2">
             <div className="flex justify-between items-center py-1.5">
               <span className="text-stone-500 text-sm font-normal font-['Plus_Jakarta_Sans']">
-                Subtotal
+                Subtotal ({itemCount} {itemCount === 1 ? 'producto' : 'productos'})
               </span>
               <span className="text-stone-900 text-sm font-medium font-['Plus_Jakarta_Sans']">
-                ${totalCarrito.toFixed(2)}
+                ${total.toFixed(2)}
               </span>
             </div>
             <div className="flex justify-between items-center py-1.5">
@@ -145,7 +88,7 @@ import config from "../config/apiConfig";
                 Total
               </span>
               <span className="text-stone-900 text-base sm:text-lg font-bold font-['Plus_Jakarta_Sans']">
-                ${(totalCarrito + 1.5).toFixed(2)}
+                ${(total + 1.5).toFixed(2)}
               </span>
             </div>
           </div>

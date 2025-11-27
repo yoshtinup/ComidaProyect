@@ -77,9 +77,17 @@ function BodyInicio() {
     };
 
     const handleExploreMenu = () => {
-        // Lógica para explorar el menú
-        navigate('/home');
-        console.log("Explorar menú");
+        // Verificar si el usuario está logueado
+        const token = localStorage.getItem('token');
+        if (token) {
+            // Si está logueado, ir a selector de dispensador
+            navigate('/dispenser-selector');
+            console.log("Usuario logueado - Redirigir a selector de dispensador");
+        } else {
+            // Si no está logueado, ir al login
+            navigate('/login');
+            console.log("Usuario no logueado - Redirigir al login");
+        }
     };
 
     const handleStartOrdering = () => {
@@ -272,7 +280,7 @@ function BodyInicio() {
                                 <AnimatedButton 
                                     variant="secondary" 
                                     onClick={handleExploreMenu}
-                                    className="bg-transparent border-2 border-white text-white hover:bg-white hover:text-black text-sm sm:text-base px-6 sm:px-8 h-10 sm:h-12"
+                                    className="bg-transparent border-2 border-white text-black hover:bg-white hover:text-black text-sm sm:text-base px-6 sm:px-8 h-10 sm:h-12"
                                 >
                                     Ver menú completo
                                 </AnimatedButton>

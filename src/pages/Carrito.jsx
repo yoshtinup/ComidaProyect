@@ -6,7 +6,8 @@ import config from "../config/apiConfig";
 
 function Carrito() {
     const [userData, setUserData] = useState(null);
-    const [carritos, setCarritos] = useState([]);
+    const [cartData, setCartData] = useState(null);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const token = localStorage.getItem('token');
@@ -25,15 +26,39 @@ function Carrito() {
         }
     }, []);
 
+    // Función para obtener el carrito del usuario
+    const fetchCart = async (userId) => {
+        if (!userId) return;
+        
+        setLoading(true);
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch(config.endpoints.carritoByUser(userId), {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                setCartData(result.data);
+                console.log("Carrito obtenido:", result.data);
+            } else {
+                setCartData({ items: [], total: "0.00", itemCount: 0, totalQuantity: 0 });
+            }
+        } catch (err) {
+            console.error("Error al obtener carrito:", err);
+            setCartData({ items: [], total: "0.00", itemCount: 0, totalQuantity: 0 });
+        } finally {
+            setLoading(false);
+        }
+    };
+
     useEffect(() => {
         if (userData && userData.id) {
-            fetch(config.endpoints.carritoList)
-                .then(res => res.json())
-                .then(data => {
-                    const filtrados = data.filter(item => String(item.iduser) === String(userData.id));
-                    setCarritos(filtrados);
-                })
-                .catch(err => console.error("Error al obtener carritos:", err));
+            fetchCart(userData.id);
         }
     }, [userData]);
 
@@ -42,9 +67,11 @@ function Carrito() {
             <Header/>
             
             <BodyCarrito 
-            idpruducto={carritos.map(c => c.idproducto)}
-            idcarrito={carritos.map(c => c.id)}
-             />
+                cartData={cartData}
+                loading={loading}
+                onRefreshCart={() => fetchCart(userData?.id)}
+                userId={userData?.id}
+            />
         </>
     );
 }

@@ -13,11 +13,11 @@ function PagoItem({ imageUrl, name, units, total, idcarrito, onRemove }) {
                 <div className="w-16 h-16 flex-shrink-0">
                     {imageUrl ? (
                         <img
-                            src={productService.getProductImageUrl(imageUrl)}
+                            src={imageUrl}
                             alt={name}
                             className="w-full h-full object-cover rounded-lg"
                             onError={(e) => {
-                                e.target.src = '/placeholder-image.png'; // imagen por defecto si falla
+                                e.target.src = '/snack_bag.jpg'; // imagen por defecto si falla
                                 e.target.onerror = null; // evita bucle infinito
                             }}
                         />

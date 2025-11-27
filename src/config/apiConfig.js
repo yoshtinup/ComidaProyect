@@ -37,6 +37,8 @@ const config = {
     carritoAdd: `${API_CARRITO_URL}/api/v1/carrito`,
     carritoUpdate: (itemId) => `${API_CARRITO_URL}/api/v1/carrito/${itemId}`,
     carritoDelete: (itemId) => `${API_CARRITO_URL}/api/v1/carrito/${itemId}`,
+    carritoIncrement: (userId, productId) => `${API_CARRITO_URL}/api/v1/carrito/${userId}/increment/${productId}`,
+    carritoDecrement: (userId, productId) => `${API_CARRITO_URL}/api/v1/carrito/${userId}/decrement/${productId}`,
     
     // API de autenticación y usuarios
     userRegister: `${API_BASE_URL}/api/v1/user`,
